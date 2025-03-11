@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+
+    /* Terminal Colors - Light Theme */
+    --terminal-bg: 0 0% 97%;
+    --terminal-text: 240 10% 30%;
+    --terminal-cursor: 240 5.9% 10%;
+    --terminal-selection: 240 5% 90%;
+    --terminal-black: 240 10% 30%;
+    --terminal-red: 0 84% 60%;
+    --terminal-green: 142 76% 36%;
+    --terminal-yellow: 38 92% 50%;
+    --terminal-blue: 212 100% 50%;
+    --terminal-magenta: 300 100% 50%;
+    --terminal-cyan: 180 100% 50%;
+    --terminal-white: 0 0% 95%;
+    --terminal-bright-black: 240 10% 40%;
+    --terminal-bright-red: 0 84% 70%;
+    --terminal-bright-green: 142 76% 46%;
+    --terminal-bright-yellow: 38 92% 60%;
+    --terminal-bright-blue: 212 100% 60%;
+    --terminal-bright-magenta: 300 100% 60%;
+    --terminal-bright-cyan: 180 100% 60%;
+    --terminal-bright-white: 0 0% 100%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+
+    /* Terminal Colors - Dark Theme */
+    --terminal-bg: 240 10% 10%;
+    --terminal-text: 240 10% 80%;
+    --terminal-cursor: 240 10% 80%;
+    --terminal-selection: 240 10% 30%;
+    --terminal-black: 240 10% 20%;
+    --terminal-red: 0 84% 60%;
+    --terminal-green: 142 76% 46%;
+    --terminal-yellow: 38 92% 60%;
+    --terminal-blue: 212 100% 60%;
+    --terminal-magenta: 300 100% 60%;
+    --terminal-cyan: 180 100% 60%;
+    --terminal-white: 240 10% 80%;
+    --terminal-bright-black: 240 10% 40%;
+    --terminal-bright-red: 0 84% 70%;
+    --terminal-bright-green: 142 76% 56%;
+    --terminal-bright-yellow: 38 92% 70%;
+    --terminal-bright-blue: 212 100% 70%;
+    --terminal-bright-magenta: 300 100% 70%;
+    --terminal-bright-cyan: 180 100% 70%;
+    --terminal-bright-white: 240 10% 90%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* Terminal specific styles */
+.xterm {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+}
+
+.xterm-screen {
+  width: 100% !important;
+}
+
+.xterm-cursor {
+  border-color: hsl(var(--terminal-cursor)) !important;
+}
+
+.xterm-cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+#terminal-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.terminal-card {
+  background-color: hsl(var(--terminal-bg));
+  overflow: hidden;
+}
+
+.terminal-card .xterm-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal-card .xterm-viewport::-webkit-scrollbar-track {
+  background: hsl(var(--terminal-bg));
+}
+
+.terminal-card .xterm-viewport::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+.terminal-card .xterm-viewport::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Chat specific styles */
+.chat-card {
+  background-color: hsl(var(--card));
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Legacy styles - keeping for compatibility */
+.terminal-container {
+  height: 100%;
+  background-color: hsl(var(--terminal-bg));
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.chat-container {
+  height: 100%;
+  background-color: hsl(var(--card));
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.chat-input-container {
+  padding: 1rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.chat-input {
+  width: 100%;
+  background-color: hsl(var(--muted));
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  color: hsl(var(--foreground));
+}
+
+.chat-input:focus {
+  outline: 2px solid hsl(var(--ring));
+}
+
+.message {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  max-width: 80%;
+}
+
+.user-message {
+  background-color: hsl(var(--primary) / 0.1);
+  margin-left: auto;
+}
+
+.ai-message {
+  background-color: hsl(var(--muted));
+  margin-right: auto;
+}
+
+.chart-1 {
+  --chart-1: 12 76% 61%;
+}
+
+.chart-2 {
+  --chart-2: 173 58% 39%;
+}
+
+.chart-3 {
+  --chart-3: 197 37% 24%;
+}
+
+.chart-4 {
+  --chart-4: 43 74% 66%;
+}
+
+.chart-5 {
+  --chart-5: 27 87% 67%;
+} 
