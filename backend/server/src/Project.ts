@@ -254,10 +254,8 @@ export class Project {
       if (!this.gitClient) throw Error("No git client")
       if (!this.fileManager) throw Error("No file manager")
       // TODO: Get files from E2B and deploy them
-      /*await this.gitClient.pushFiles(
-        await this.fileManager?.loadFileContent(),
-        this.projectId
-      )*/
+      const tarBase64 = await this.fileManager.getFilesForDownload()
+      await this.gitClient.pushFiles(tarBase64, this.projectId)
       return { success: true }
     }
 
@@ -334,10 +332,10 @@ export class Project {
     const handleDownloadFiles: SocketHandler = async () => {
       if (!this.fileManager) throw Error("No file manager")
 
-      // Get the Base64 encoded ZIP string
-      const zipBase64 = await this.fileManager.getFilesForDownload()
+      // Get the Base64 encoded tar.gz string
+      const tarBase64 = await this.fileManager.getFilesForDownload()
 
-      return { zipBlob: zipBase64 }
+      return { tarBlob: tarBase64 }
     }
 
     return {

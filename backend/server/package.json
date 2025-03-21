@@ -28,6 +28,7 @@
     "simple-git": "^3.25.0",
     "socket.io": "^4.7.5",
     "ssh2": "^1.15.0",
+    "tar": "^7.4.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -39,6 +40,7 @@
     "@types/node": "^20.12.7",
     "@types/pg": "^8.11.11",
     "@types/ssh2": "^1.15.0",
+    "@types/tar": "^6.1.13",
     "drizzle-kit": "^0.30.4",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.0",

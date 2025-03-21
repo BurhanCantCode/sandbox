@@ -173,7 +173,7 @@ export class FileManager {
 
   // Move a file to a different folder
   async moveFile(
-    fileId: string, 
+    fileId: string,
     folderId: string
   ): Promise<(TFolder | TFile)[]> {
     const newFileId = path.posix.join(folderId, path.posix.basename(fileId))
@@ -184,18 +184,14 @@ export class FileManager {
 
   // Move a file within the container
   private async moveFileInContainer(oldPath: string, newPath: string) {
-    try {
-      const fileContents = await this.container.files.read(
-        path.posix.join(this.dirName, oldPath)
-      )
-      await this.container.files.write(
-        path.posix.join(this.dirName, newPath),
-        fileContents
-      )
-      await this.container.files.remove(path.posix.join(this.dirName, oldPath))
-    } catch (e) {
-      console.error(`Error moving file from ${oldPath} to ${newPath}:`, e)
-    }
+    const fileContents = await this.container.files.read(
+      path.posix.join(this.dirName, oldPath)
+    )
+    await this.container.files.write(
+      path.posix.join(this.dirName, newPath),
+      fileContents
+    )
+    await this.container.files.remove(path.posix.join(this.dirName, oldPath))
   }
 
   // Create a new file
@@ -207,8 +203,27 @@ export class FileManager {
   }
 
   public async getFilesForDownload(): Promise<string> {
-    // TODO: Use E2B to create the zip file
-    return ""
+    // Create an output path in /tmp
+    const tempTarPath = "/tmp/project.tar.gz"
+
+    // Create an archive of the project directory
+    await this.container.commands.run(
+      `cd ${this.dirName} && tar --exclude="node_modules" --exclude="venv" -czvf ${tempTarPath} .`,
+      {
+        timeoutMs: 5000,
+      }
+    )
+
+    // Read the archive contents in base64 format
+    const base64Result = await this.container.commands.run(
+      `cat ${tempTarPath} | base64 -w 0`
+    )
+
+    // Delete the archive
+    await this.container.commands.run(`rm ${tempTarPath}`)
+
+    // Return the base64 encoded tar.gz content
+    return base64Result.stdout.trim()
   }
 
   // Create a new folder
