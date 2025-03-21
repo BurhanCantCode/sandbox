@@ -1,16 +1,18 @@
 import cors from "cors"
 import dotenv from "dotenv"
-import express, { Express } from "express"
+import express, { Express, Request, Response } from "express"
 import fs from "fs"
 import { createServer } from "http"
 import { Server, Socket } from "socket.io"
 import api from "./api"
 
+import { socketClerkAuth } from "./clerkAuth"
 import { ConnectionManager } from "./ConnectionManager"
 import { DokkuClient } from "./DokkuClient"
 import { Project } from "./Project"
+import { optionalAuth } from "./restAuth"
 import { SecureGitClient } from "./SecureGitClient"
-import { socketAuth } from "./socketAuth" // Import the new socketAuth middleware
+import { socketAuth } from "./socketAuth"
 import { TFile, TFolder } from "./types"
 
 // Log errors and send a notification to the client
@@ -49,9 +51,6 @@ const io = new Server(httpServer, {
   },
 })
 
-// Middleware for socket authentication
-io.use(socketAuth) // Use the new socketAuth middleware
-
 // Check for required environment variables
 if (!process.env.DOKKU_HOST)
   console.warn("Environment variable DOKKU_HOST is not defined")
@@ -59,6 +58,13 @@ if (!process.env.DOKKU_USERNAME)
   console.warn("Environment variable DOKKU_USERNAME is not defined")
 if (!process.env.DOKKU_KEY)
   console.warn("Environment variable DOKKU_KEY is not defined")
+if (!process.env.CLERK_SECRET_KEY)
+  console.warn("Environment variable CLERK_SECRET_KEY is not defined")
+
+// Socket authentication middleware chain
+// First verify Clerk token, then proceed with existing auth
+io.use(socketClerkAuth)
+io.use(socketAuth)
 
 // Initialize Dokku client
 const dokkuClient =
@@ -182,20 +188,43 @@ io.on("connection", async (socket) => {
 })
 app.use(express.json())
 
-// Use the API routes
-app.use(async (req: any, res) => {
+// Wrap the API router with authentication middleware
+const apiHandler = async (req: Request, res: Response) => {
   try {
-    // The API router returns a Node.js response, but we need to send an Express.js response
-    const response = await api.fetch(req)
-    const reader = response.body?.getReader()
-    const value = await reader?.read()
-    const responseText = new TextDecoder().decode(value?.value)
-    res.status(response.status).send(responseText)
+    // Convert Express request to the format expected by api.fetch
+    const apiRequest: globalThis.Request = {
+      url: req.url,
+      method: req.method,
+      headers: new Headers(req.headers as any),
+      body: req.body
+    } as any;
+    
+    // Call the API with the converted request
+    const response = await api.fetch(apiRequest);
+    const reader = response.body?.getReader();
+    const value = await reader?.read();
+    const responseText = new TextDecoder().decode(value?.value);
+    res.status(response.status).send(responseText);
   } catch (error) {
-    console.error("Error processing API request:", error)
-    res.status(500).send("Internal Server Error")
+    console.error("Error processing API request:", error);
+    res.status(500).send("Internal Server Error");
   }
-})
+};
+
+// Apply optional auth to all API routes by default
+// This means authentication is supported but not required
+app.use('/api', optionalAuth, (req, res, next) => {
+  // If user is authenticated via Clerk, we can add the userId to query params
+  // This helps existing endpoints identify the user without code changes
+  if (req.auth?.userId) {
+    if (!req.query) req.query = {};
+    // Only set userId if not already present in the query
+    if (!req.query.userId) {
+      req.query.userId = req.auth.userId;
+    }
+  }
+  next();
+}, apiHandler);
 
 // Start the server
 httpServer.listen(port, () => {
