@@ -1,15 +1,15 @@
-import { drizzle } from "drizzle-orm/node-postgres" // Import drizzle for PostgreSQL
+import { drizzle } from "drizzle-orm/node-postgres"; // Import drizzle for PostgreSQL
 import { json } from "itty-router-extras"
 import { z } from "zod"
 
 import { and, eq, sql } from "drizzle-orm"
 import * as schema from "./schema"
 import {
-  Sandbox,
-  sandbox,
-  sandboxLikes,
-  user,
-  usersToSandboxes,
+    Sandbox,
+    sandbox,
+    sandboxLikes,
+    user,
+    usersToSandboxes,
 } from "./schema"
 
 // Add dotenv configuration

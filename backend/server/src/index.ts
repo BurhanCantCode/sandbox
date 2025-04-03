@@ -8,9 +8,10 @@ import api from "./api"
 
 import { ConnectionManager } from "./ConnectionManager"
 import { DokkuClient } from "./DokkuClient"
+import { requireAuth } from './middleware/clerkAuth'
 import { Project } from "./Project"
 import { SecureGitClient } from "./SecureGitClient"
-import { socketAuth } from "./socketAuth" // Import the new socketAuth middleware
+import { socketAuth } from "./socketAuth"; // Import the new socketAuth middleware
 import { TFile, TFolder } from "./types"
 
 // Log errors and send a notification to the client
@@ -42,6 +43,11 @@ dotenv.config()
 const app: Express = express()
 const port = process.env.PORT || 4000
 app.use(cors())
+app.use(express.json())
+
+// Apply Clerk authentication middleware to all API routes
+app.use('/api', requireAuth)
+
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
   cors: {
@@ -180,20 +186,27 @@ io.on("connection", async (socket) => {
     handleErrors("Error connecting:", e, socket)
   }
 })
-app.use(express.json())
 
 // Use the API routes
 app.use(async (req: any, res) => {
   try {
     // The API router returns a Node.js response, but we need to send an Express.js response
     const response = await api.fetch(req)
-    const reader = response.body?.getReader()
-    const value = await reader?.read()
-    const responseText = new TextDecoder().decode(value?.value)
+    if (!response.body) {
+      return res.status(response.status).send()
+    }
+    const reader = response.body.getReader()
+    const chunks = []
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
+    }
+    const responseText = Buffer.concat(chunks).toString('utf-8')
     res.status(response.status).send(responseText)
   } catch (error) {
     console.error("Error processing API request:", error)
-    res.status(500).send("Internal Server Error")
+    res.status(500).json({ error: "Internal Server Error" })
   }
 })
 
