@@ -188,9 +188,17 @@ export default function EditProfileForm(props: {
                             {...field}
                             className="peer ps-9"
                             value={value.url}
-                            onChange={(e) =>
-                              onChange(parseSocialLink(e.currentTarget.value))
-                            }
+                            onChange={(e) => {
+                              const newValue = e.currentTarget.value
+                              const oldValue = value.url
+                              
+                              // Skip auto-prefix if field is empty or user is deleting
+                              if (!newValue || newValue.length < oldValue.length) {
+                                onChange({ url: newValue, platform: "generic" })
+                              } else {
+                                onChange(parseSocialLink(newValue))
+                              }
+                            }}
                           />
                           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
                             <Icon
